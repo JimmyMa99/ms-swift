@@ -104,6 +104,7 @@ class LLMTemplateType:
     ernie = 'ernie'
     ernie_thinking = 'ernie_thinking'
     longchat = 'longchat'
+    userlm = 'userlm'
 
     aya = 'aya'
     c4ai = 'c4ai'

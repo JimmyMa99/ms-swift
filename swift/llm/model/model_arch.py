@@ -23,6 +23,7 @@ class LLMModelArch:
     phi3_small = 'phi3_small'
     telechat = 'telechat'
     dbrx = 'dbrx'
+    userlm = 'userlm'
 
 
 class MLLMModelArch:
@@ -85,6 +86,7 @@ class MLLMModelArch:
 
     midashenglm = 'midashenglm'
     step_audio2_mini = 'step_audio2_mini'
+    userlm = 'userlm'
 
 
 class ModelArch(LLMModelArch, MLLMModelArch):
@@ -324,6 +326,28 @@ register_model_arch(
         embedding='model.embed_tokens',
         lm_head='lm_head',
     ))
+
+register_model_arch(
+    ModelKeys(
+        LLMModelArch.userlm,
+        module_list='model.layers',
+        mlp='model.layers.{}.mlp',
+        down_proj='model.layers.{}.mlp.down_proj',
+
+        # Attention
+        attention='model.layers.{}.self_attn',
+        q_proj='model.layers.{}.self_attn.q_proj',
+        k_proj='model.layers.{}.self_attn.k_proj',
+        v_proj='model.layers.{}.self_attn.v_proj',
+        o_proj='model.layers.{}.self_attn.o_proj',
+
+        # Embedding
+        embedding='model.embed_tokens',
+
+        # LM head
+        lm_head='lm_head',
+    )
+)
 
 register_model_arch(
     MultiModelKeys(

@@ -1,4 +1,5 @@
-from swift.llm import TemplateInputs, get_model_tokenizer, get_template
+from swift.llm import TemplateInputs, get_template
+from swift.llm.model import get_model_tokenizer
 
 
 def test_deepseek_v2_5():
@@ -126,10 +127,53 @@ def test_deepseek_v3_1():
     template.print_inputs(res2)
     assert res['input_ids'] == res2['input_ids']
 
+def test_userlm():
+    tokenizer = get_model_tokenizer('/root/models/microsoft/UserLM-8b/microsoft/UserLM-8b', load_model=False)[1]
+    template = get_template(tokenizer.model_meta.template, tokenizer)
+
+    inputs = TemplateInputs(
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant..."
+    },
+    {
+      "role": "user",
+      "content": "Hello!"
+    },
+    {
+      "role": "assistant",
+      "content": "I am assistant!"
+    },
+    {
+      "role": "user",
+      "content": "What?!"
+    },
+    {
+      "role": "assistant",
+      "content": "You are a user chatting with an assistant language model to express confusion and seek clarification."
+    }
+  ]
+}
+)
+
+    res = template.encode(inputs)
+    template.print_inputs(res)
+
+    
+    template.template_backend = 'jinja'
+    res2 = template.encode(inputs)
+    decoded = tokenizer.decode(res['input_ids'])
+    decoded = tokenizer.decode(res2['input_ids'])
+    assert res == res2
+
 
 if __name__ == '__main__':
     # test_deepseek_v2_5()
     # test_qwen2_5_math_reward()
     # test_minimax()
     # test_minimax_vl()
-    test_deepseek_v3_1()
+    # test_deepseek_v3_1()
+    test_userlm()
+

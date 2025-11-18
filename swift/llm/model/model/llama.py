@@ -370,3 +370,17 @@ register_model(
         model_arch=ModelArch.llama,
         architectures=['LlamaForCausalLM'],
     ))
+
+register_model(
+    ModelMeta(
+        LLMModelType.userlm,
+        [
+            ModelGroup([
+                Model('microsoft/UserLM-8b', 'microsoft/UserLM-8b'),
+            ]),
+        ],
+        TemplateType.userlm,
+        get_model_tokenizer_llama,
+        architectures=['LlamaForCausalLM'],
+        requires=['transformers>=4.52.4'],
+    ))
