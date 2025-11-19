@@ -146,14 +146,6 @@ def test_userlm():
       "role": "assistant",
       "content": "I am assistant!"
     },
-    {
-      "role": "user",
-      "content": "What?!"
-    },
-    {
-      "role": "assistant",
-      "content": "You are a user chatting with an assistant language model to express confusion and seek clarification."
-    }
   ]
 }
 )
