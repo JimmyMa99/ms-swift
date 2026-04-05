@@ -1,7 +1,8 @@
 # Copyright (c) Alibaba, Inc. and its affiliates.
 
 import datetime as dt
-from dataclasses import dataclass, field
+from copy import deepcopy
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Literal, Optional
 
 import torch
@@ -11,9 +12,10 @@ from swift.utils import get_env_args
 from ..base import Template
 from ..constant import LLMTemplateType, MLLMTemplateType
 from ..register import TemplateMeta, register_template
-from ..template_inputs import StdTemplateInputs
+from ..template_inputs import InferRequest, StdTemplateInputs, TemplateInputs
 from ..utils import Context, Prompt, Word, findall
 from ..vision_utils import load_batch
+from .utils import EmptyTemplateMeta
 
 # ref: https://github.com/facebookresearch/llama/blob/main/llama/generation.py
 LLAMA_DEFAULT_SYSTEM = (
@@ -47,6 +49,37 @@ class Llama3TemplateMeta(TemplateMeta):
 
 
 register_template(Llama3TemplateMeta(LLMTemplateType.llama3))
+
+
+class UserLMTemplate(Template):
+
+    def encode(self, inputs, return_template_inputs: bool = False, return_length: bool = False):
+        assert self._processor_inited, ('Please initialize the processor before calling the template.encode method: '
+                                        'template.init_processor(processor).')
+        if isinstance(inputs, (InferRequest, TemplateInputs)):
+            inputs = asdict(inputs)
+        if isinstance(inputs, dict):
+            inputs = TemplateInputs(**deepcopy(inputs))
+        elif isinstance(inputs, TemplateInputs):
+            inputs = deepcopy(inputs)
+        return super().encode(inputs, return_template_inputs=return_template_inputs, return_length=return_length)
+
+    def _encode(self, inputs):
+        inputs = deepcopy(inputs)
+        template_backend = self.template_backend
+        try:
+            self.template_backend = 'jinja'
+            return super()._encode(inputs)
+        finally:
+            self.template_backend = template_backend
+
+
+@dataclass
+class UserLMTemplateMeta(EmptyTemplateMeta):
+    agent_template: str = 'llama3'
+
+
+register_template(UserLMTemplateMeta(LLMTemplateType.userlm, template_cls=UserLMTemplate))
 
 
 def _get_llama3_2_prefix() -> Prompt:

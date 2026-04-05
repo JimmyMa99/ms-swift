@@ -64,6 +64,10 @@ register_model(
                 Model('AI-ModelScope/Llama-2-7b-AQLM-2Bit-1x16-hf', 'ISTA-DASLab/Llama-2-7b-AQLM-2Bit-1x16-hf'),
             ],
                        requires=['transformers>=4.38', 'aqlm', 'torch>=2.2.0']),
+            ModelGroup([
+                Model('microsoft/UserLM-8b', 'microsoft/UserLM-8b'),
+            ],
+                       template=TemplateType.userlm),
         ],
         TemplateType.llama,
         get_model_tokenizer_llama,

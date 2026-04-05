@@ -95,6 +95,30 @@ def test_minimax_vl():
     assert len(res['input_ids']) == 5877
 
 
+def test_userlm():
+    tokenizer = get_model_tokenizer('/root/models/microsoft/UserLM-8b/microsoft/UserLM-8b', load_model=False)[1]
+    template = get_template(tokenizer.model_meta.template, tokenizer)
+    inputs = TemplateInputs(messages=[{
+        'role': 'system',
+        'content': 'You generate the next user turn in a conversation.'
+    }, {
+        'role': 'user',
+        'content': 'The assistant just said: Hello, how can I help you today?'
+    }, {
+        'role': 'assistant',
+        'content': 'I can help with planning, coding, or writing. What would you like to do?'
+    }])
+    res = template.encode(inputs)
+    template.print_inputs(res)
+    text = tokenizer.decode(res['input_ids'])
+    assert '<|start_header_id|>assistant<|end_header_id|>' in text
+    assert 'I can help with planning, coding, or writing. What would you like to do?' in text
+    assert text.endswith('<|start_header_id|>user<|end_header_id|>')
+    template.template_backend = 'jinja'
+    res2 = template.encode(inputs)
+    assert res['input_ids'] == res2['input_ids']
+
+
 if __name__ == '__main__':
     # test_deepseek_v2_5()
     # test_qwen2_5_math_reward()
